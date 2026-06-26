@@ -149,8 +149,8 @@ const handleCheckoutSubmission = () => {
   const handleNurseRegister = (e) => {
     e.preventDefault();
     const newId = `NURSE-00${nursesDb.length + 1}`;
-    const profileUrl = regForm.profileImage ? URL.createObjectURL(regForm.profileImage) : "/Gemini_Generated_Image_wu2wddwu2wddwu2w.png";
-    const certificateUrl = regForm.certificateImage ? URL.createObjectURL(regForm.certificateImage) : "/Gemini_Generated_Image_lsyagslsyagslsya.png";
+    const profileUrl = regForm.profileImage ? URL.createObjectURL(regForm.profileImage) : "/nurse.png";
+    const certificateUrl = regForm.certificateImage ? URL.createObjectURL(regForm.certificateImage) : "/certificate.png";
 
     const newNurseRecord = {
       id: newId,
@@ -255,7 +255,7 @@ const handleCheckoutSubmission = () => {
                   </svg>
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-lg sm:text-xl font-extrabold text-slate-900 tracking-tight font-display leading-none">Home Nursing Care</span>
+                  <span className="text-lg sm:text-xl font-extrabold text-slate-900 tracking-tight font-display leading-none">Care Sphere</span>
                   <span className="text-[10px] uppercase font-bold tracking-widest text-teal-600 mt-0.5">Compassionate • Professional • Trusted</span>
                 </div>
               </div>
@@ -395,7 +395,7 @@ const handleCheckoutSubmission = () => {
                           author: "Srivathsa Bhat",
                           relation: "Son of Patient",
                           rating: "⭐⭐⭐⭐•",
-                          photo: "successful-businessman.jpg"
+                          photo: "successful-businessman.png"
                         },
                         {
                           quote: "Exceptional experience with the post-op wound dressing care. Having hospital-grade clinical sanitation right in our living room made recovery twice as fast.",
@@ -409,7 +409,7 @@ const handleCheckoutSubmission = () => {
                           author: "Ananth Rao",
                           relation: "Guardian",
                           rating: "⭐⭐⭐⭐⭐",
-                          photo: "indian-man-portrait-temple.jpg"
+                          photo: "indian-man-portrait-temple.png"
                         },
                         {
                           quote: "A genuinely trustworthy community platform. The transparent invoice pricing breakdown and the fully verified credentials deck gave us absolute confidence.",
@@ -490,7 +490,7 @@ const handleCheckoutSubmission = () => {
                       {/* Right: The Collage Graphic Asset Layout */}
                       <div className="md:w-7/12 min-h-[260px] md:min-h-auto relative bg-slate-800">
                         <img 
-                          src="Untitled design.png" 
+                          src="untitled-design.png" 
                           alt="Diverse smiling senior patients giving thumbs up showcasing a 98% healthcare platform satisfaction score" 
                           className="w-full h-full object-cover object-center absolute inset-0"
                           loading="eager"
@@ -704,106 +704,140 @@ const handleCheckoutSubmission = () => {
               )}
 
               {/* SUB VIEW 2: MULTI-STEP REGISTRATION & BOOKING */}
-              {patientSubView === 'booking_form' && (
-                <div className="max-w-xl mx-auto bg-white rounded-2xl border border-slate-100 shadow-xl overflow-hidden animate-fadeIn my-6">
+          {patientSubView === 'booking_form' && (
+            <div className="max-w-xl mx-auto bg-white rounded-2xl border border-slate-100 shadow-xl overflow-hidden animate-fadeIn my-6">
+              
+              <div className="relative bg-gradient-to-r from-teal-600 to-cyan-700 text-white p-6 sm:p-8 overflow-hidden flex items-center gap-4">
+                <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-2xl"></div>
+                
+                {/* 👈 FIXED: DYNAMIC INTERACTIVE BACK ARROW */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    // 1. 🎯 THE CORE FIX: Snap cleanly back to your main service catalog grid layout view
+                    setPatientSubView('catalog');
+                    
+                    // 2. Completely wipe subscription tier states so they start fresh on next click
+                    if (selectedTier) {
+                      setSelectedTier(null);
+                    }
+                    
+                    // 3. Clear out administrative editing sub-states if necessary
+                    if (activeBooking.patientNotes === 'editing_profile') {
+                      setActiveBooking(prev => ({ ...prev, patientNotes: '' }));
+                    }
+                  }}
+                  className="p-1.5 rounded-full bg-white/10 hover:bg-white/20 transition-all cursor-pointer group flex-shrink-0 z-10 border border-white/5"
+                  aria-label="Navigate back to catalog"
+                >
+                  <svg 
+                    xmlns="http://www.w3.org/2000/svg" 
+                    fill="none" 
+                    viewBox="0 0 24 24" 
+                    strokeWidth={2.5} 
+                    stroke="currentColor" 
+                    className="w-5 h-5 transform group-hover:-translate-x-0.5 transition-transform"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                  </svg>
+                </button>
+
+                <div className="flex-1 min-w-0 z-10">
+                  <span className="inline-block text-[10px] uppercase font-bold tracking-widest bg-white/15 text-teal-50 px-2.5 py-1 rounded-md">
+                    {selectedTier ? `Membership: ${selectedTier}` : (activeBooking.patientNotes === 'editing_profile' || !currentPatient ? "Step 1: Patient Profile" : "Step 2: Deployment Setup")}
+                  </span>
+                  <h2 className="text-2xl font-black font-display tracking-tight mt-1 truncate">
+                    {selectedTier ? "Subscription Intake Profile" : (activeBooking.patientNotes === 'editing_profile' || !currentPatient ? "Patient Intake Registration" : "Configure Clinical Shift")}
+                  </h2>
+                </div>
+              </div>
+
+              {/* INTERACTIVE ROUTING CONTROLLER CONDITIONAL */}
+              {(selectedTier || activeBooking.patientNotes === 'editing_profile' || !currentPatient) ? (
+                <form 
+                  onSubmit={(e) => {
+                    e.preventDefault();
+
+                    // 🔍 CLIENT-SIDE VERIFICATION CHECKS
+                    const phoneRegex = /^[6-9]\d{9}$/; // Validates Indian mobile numbers starting with 6-9
+                    if (!phoneRegex.test(patientForm.phone.trim())) {
+                      alert("Validation Error: Please enter a valid 10-digit mobile number.");
+                      return;
+                    }
+
+                    if (patientForm.name.trim().length < 2) {
+                      alert("Validation Error: Patient name must be at least 2 characters long.");
+                      return;
+                    }
+
+                    if (patientForm.guardianName.trim().length < 2) {
+                      alert("Validation Error: Guardian name must be at least 2 characters long.");
+                      return;
+                    }
+
+                    if (parseInt(patientForm.age) <= 0 || parseInt(patientForm.age) > 125) {
+                      alert("Validation Error: Please enter a realistic age between 1 and 125.");
+                      return;
+                    }
+
+                    if (patientForm.address.trim().length < 10) {
+                      alert("Validation Error: Please provide a complete address layout (minimum 10 characters).");
+                      return;
+                    }
+
+                    // Proceed if all client-side verification checks pass successfully
+                    let savedProfile = patientsDb.find(p => p.phone.trim() === patientForm.phone.trim());
+                    if (!savedProfile) {
+                      savedProfile = { ...patientForm };
+                      setPatientsDb([...patientsDb, savedProfile]);
+                    }
+                    setCurrentPatient(savedProfile);
+
+                    if (!selectedTier) {
+                      setActiveBooking(prev => ({ ...prev, patientNotes: '' }));
+                    } else {
+                      setActiveBooking({
+                        service: CLINICAL_SERVICES[0],
+                        shiftType: selectedTier, 
+                        shiftMultiplier: 1,
+                        durationDays: 1,
+                        patientNotes: 'awaiting_payment' 
+                      });
+                      setSelectedTier(null);
+                    }
+                  }} 
+                  className="p-6 sm:p-8 space-y-4 text-xs"
+                >
                   
-                  <div className="relative bg-gradient-to-r from-teal-600 to-cyan-700 text-white p-6 sm:p-8 overflow-hidden">
-                    <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-2xl"></div>
-                    <span className="text-[10px] uppercase font-bold tracking-widest bg-white/15 text-teal-50 px-2.5 py-1 rounded-md">
-                      {selectedTier ? `Membership: ${selectedTier}` : (activeBooking.patientNotes === 'editing_profile' || !currentPatient ? "Step 1: Patient Profile" : "Step 2: Deployment Setup")}
-                    </span>
-                    <h2 className="text-2xl font-black font-display tracking-tight mt-2">
-                      {selectedTier ? "Subscription Intake Profile" : (activeBooking.patientNotes === 'editing_profile' || !currentPatient ? "Patient Intake Registration" : "Configure Clinical Shift")}
-                    </h2>
-                  </div>
-
-                  {/* INTERACTIVE ROUTING CONTROLLER CONDITIONAL */}
-                  {(selectedTier || activeBooking.patientNotes === 'editing_profile' || !currentPatient) ? (
-                    <form 
-                      onSubmit={(e) => {
-                        e.preventDefault();
-
-                        // 🔍 CLIENT-SIDE VERIFICATION CHECKS
-                        const phoneRegex = /^[6-9]\d{9}$/; // Validates Indian mobile numbers starting with 6-9
-                        if (!phoneRegex.test(patientForm.phone.trim())) {
-                          alert("Validation Error: Please enter a valid 10-digit mobile number.");
-                          return;
-                        }
-
-                        if (patientForm.name.trim().length < 2) {
-                          alert("Validation Error: Patient name must be at least 2 characters long.");
-                          return;
-                        }
-
-                        if (patientForm.guardianName.trim().length < 2) {
-                          alert("Validation Error: Guardian name must be at least 2 characters long.");
-                          return;
-                        }
-
-                        if (parseInt(patientForm.age) <= 0 || parseInt(patientForm.age) > 125) {
-                          alert("Validation Error: Please enter a realistic age between 1 and 125.");
-                          return;
-                        }
-
-                        if (patientForm.address.trim().length < 10) {
-                          alert("Validation Error: Please provide a complete address layout (minimum 10 characters).");
-                          return;
-                        }
-
-                        // Proceed if all client-side verification checks pass successfully
-                        let savedProfile = patientsDb.find(p => p.phone.trim() === patientForm.phone.trim());
-                        if (!savedProfile) {
-                          savedProfile = { ...patientForm };
-                          setPatientsDb([...patientsDb, savedProfile]);
-                        }
-                        setCurrentPatient(savedProfile);
-
-                        if (!selectedTier) {
-                          setActiveBooking(prev => ({ ...prev, patientNotes: '' }));
-                        } else {
-                          setActiveBooking({
-                            service: CLINICAL_SERVICES[0],
-                            shiftType: selectedTier, 
-                            shiftMultiplier: 1,
-                            durationDays: 1,
-                            patientNotes: 'awaiting_payment' 
-                          });
-                          setSelectedTier(null);
-                        }
-                      }} 
-                      className="p-6 sm:p-8 space-y-4 text-xs"
-                    >
-                      
-                      {/* MODIFICATION 1: CONDITIONAL SYSTEM SELECTION FIELD */}
-                      {selectedTier ? (
-                        <div className="space-y-1">
-                          <label className="font-bold text-teal-600 uppercase tracking-wide">Select Subscription Tier Plan</label>
-                          <select 
-                            className="w-full p-3 border border-teal-200 rounded-xl bg-teal-50/50 text-slate-900 font-extrabold outline-none"
-                            value={selectedTier}
-                            onChange={(e) => setSelectedTier(e.target.value)}
-                          >
-                            <option value="Essential Care">Essential Care Tier Membership</option>
-                            <option value="Chronic Management">Chronic Management Tier Membership</option>
-                            <option value="Intensive Support">Intensive Support Tier Membership</option>
-                          </select>
-                        </div>
-                      ) : (
-                        <div className="space-y-1">
-                          <label className="font-bold text-teal-600 uppercase tracking-wide">Step 0: Select Care Protocol Specialty</label>
-                          <select 
-                            className="w-full p-3 border border-teal-200 rounded-xl bg-teal-50/50 text-slate-900 font-extrabold outline-none focus:ring-2 focus:ring-teal-500/40"
-                            value={activeBooking.service?.id}
-                            onChange={(e) => {
-                              const selected = CLINICAL_SERVICES.find(s => s.id === e.target.value);
-                              setActiveBooking({ ...activeBooking, service: selected });
-                            }}
-                          >
-                            {CLINICAL_SERVICES.map(s => <option key={s.id} value={s.id}>{s.title}</option>)}
-                          </select>
-                        </div>
-                      )}
-
+                  {/* MODIFICATION 1: CONDITIONAL SYSTEM SELECTION FIELD */}
+                  {selectedTier ? (
+                    <div className="space-y-1">
+                      <label className="font-bold text-teal-600 uppercase tracking-wide">Select Subscription Tier Plan</label>
+                      <select 
+                        className="w-full p-3 border border-teal-200 rounded-xl bg-teal-50/50 text-slate-900 font-extrabold outline-none"
+                        value={selectedTier}
+                        onChange={(e) => setSelectedTier(e.target.value)}
+                      >
+                        <option value="Essential Care">Essential Care Tier Membership</option>
+                        <option value="Chronic Management">Chronic Management Tier Membership</option>
+                        <option value="Intensive Support">Intensive Support Tier Membership</option>
+                      </select>
+                    </div>
+                  ) : (
+                    <div className="space-y-1">
+                      <label className="font-bold text-teal-600 uppercase tracking-wide">Step 0: Select Care Protocol Specialty</label>
+                      <select 
+                        className="w-full p-3 border border-teal-200 rounded-xl bg-teal-50/50 text-slate-900 font-extrabold outline-none focus:ring-2 focus:ring-teal-500/40"
+                        value={activeBooking.service?.id}
+                        onChange={(e) => {
+                          const selected = CLINICAL_SERVICES.find(s => s.id === e.target.value);
+                          setActiveBooking({ ...activeBooking, service: selected });
+                        }}
+                      >
+                        {CLINICAL_SERVICES.map(s => <option key={s.id} value={s.id}>{s.title}</option>)}
+                      </select>
+                    </div>
+                  )}
                       {/* MODIFICATION 2: SMALL STARTING DATE CALENDAR SELECTOR */}
                       {selectedTier && (
                         <div className="space-y-1 animate-fadeIn">
@@ -1463,26 +1497,49 @@ const handleCheckoutSubmission = () => {
                       <div className="bg-slate-50 rounded-xl p-4 border border-slate-100 space-y-3">
                         <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Submitted Clinical Credentials Documentation:</span>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          
+                          {/* Profile Photograph Box */}
                           <div className="bg-white border border-slate-200 rounded-xl p-3 flex flex-col gap-2 shadow-2xs">
                             <p className="text-xs font-bold text-slate-800">📷 Profile Photograph</p>
                             {n.profilePreview ? (
                               <div className="w-full h-48 rounded-lg overflow-hidden border border-slate-100 bg-slate-50 flex items-center justify-center">
-                                <img src={n.profilePreview} alt="Nurse Profile Avatar" className="w-full h-full object-contain bg-slate-100" />
+                                <img 
+                                  src={n.profilePreview} 
+                                  alt="Nurse Profile Avatar" 
+                                  className="w-full h-full object-contain bg-slate-100" 
+                                  onError={(e) => {
+                                    e.target.onerror = null; 
+                                    // 🚀 THE FIX: Dynamically adds '/Nurse-Booking-App/' path prefix automatically
+                                    e.target.src = `${import.meta.env.BASE_URL}nurse.png`;
+                                  }}
+                                />
                               </div>
                             ) : (
                               <div className="w-full h-48 rounded-lg border border-dashed border-slate-200 bg-slate-50 flex items-center justify-center text-[11px] text-slate-400 italic">No Profile Image Loaded</div>
                             )}
                           </div>
+
+                          {/* License & Registration Certification Box */}
                           <div className="bg-white border border-slate-200 rounded-xl p-3 flex flex-col gap-2 shadow-2xs">
                             <p className="text-xs font-bold text-slate-800">📄 License & Registration Certification</p>
                             {n.certificatePreview ? (
                               <div className="w-full h-48 rounded-lg overflow-hidden border border-slate-100 bg-slate-50 flex items-center justify-center">
-                                <img src={n.certificatePreview} alt="Medical Certificate Document" className="w-full h-full object-contain p-1 bg-slate-100/50" />
+                                <img 
+                                  src={n.certificatePreview} 
+                                  alt="Medical Certificate Document" 
+                                  className="w-full h-full object-contain p-1 bg-slate-100/50" 
+                                  onError={(e) => {
+                                    e.target.onerror = null; 
+                                    // 🚀 THE FIX: Dynamically adds '/Nurse-Booking-App/' path prefix automatically
+                                    e.target.src = `${import.meta.env.BASE_URL}certificate.png`;
+                                  }}
+                                />
                               </div>
                             ) : (
                               <div className="w-full h-48 rounded-lg border border-dashed border-slate-200 bg-slate-50 flex items-center justify-center text-[11px] text-slate-400 italic">No Certificate Loaded</div>
                             )}
                           </div>
+
                         </div>
                       </div>
 
@@ -1677,7 +1734,7 @@ const handleCheckoutSubmission = () => {
               H
             </div>
             <p className="font-medium">
-              &copy; {new Date().getFullYear()} <span className="font-extrabold text-slate-900 font-display">Home Nursing Care Corporation</span>. All rights reserved.
+              &copy; {new Date().getFullYear()} <span className="font-extrabold text-slate-900 font-display">Care Sphere</span>. All rights reserved.
             </p>
           </div>
 
